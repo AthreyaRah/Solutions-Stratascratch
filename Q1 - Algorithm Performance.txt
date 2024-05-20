@@ -1,0 +1,49 @@
+Q1 - Algorithm Performance - Stratascratch
+
+Link: https://platform.stratascratch.com/coding/10350-algorithm-performance?code_type=1
+
+Python Solution:
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+def rating_func(row):
+    if row.clicked == 1 and row.search_results_position < 4:
+        return 3
+    elif row.clicked == 1 and row.search_results_position > 3:
+        return 2
+    elif  row.clicked == 0:
+        return 1
+        
+      
+#Creating the rating column using the apply method of pandas
+fb_search_events["ratings"] = fb_search_events.apply(rating_func, axis=1)
+
+#Getting the search ids by grouping on the "search_id" column and getting the MAX(ratings) against each search_id
+fb_search_events.groupby("search_id")["ratings"].aggregate(np.max)
+
+----------------------------------------------------------------------------------------------------------
+
+Postgres Solution:
+
+WITH ratings_CTE AS (
+SELECT
+    *,
+    CASE 
+        WHEN clicked = 1 AND search_results_position < 4 THEN 3
+        WHEN clicked = 1 AND search_results_position > 3 THEN 2
+        WHEN clicked = 0 THEN 1 END as rating
+FROM fb_search_events)
+SELECT 
+    search_id,
+    MAX(rating)
+FROM ratings_CTE
+GROUP BY search_id
+
+
+
+
+
+
