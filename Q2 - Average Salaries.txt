@@ -1,0 +1,24 @@
+Average Salaries
+
+https://platform.stratascratch.com/coding/9917-average-salaries?code_type=1
+
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+employee["avg_salary"]=employee.groupby('department').salary.transform(np.mean)
+employee[["department","first_name","salary","avg_salary"]]
+
+
+---------------------------------------------------------------------------------------
+Postgres Solution:
+
+SELECT
+    department,
+    first_name,
+    salary,
+    AVG(salary) OVER (PARTITION BY department) as avg_salary
+FROM employee
+ORDER BY 1
