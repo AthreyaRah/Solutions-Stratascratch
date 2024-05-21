@@ -1,0 +1,24 @@
+Class Performance
+
+https://platform.stratascratch.com/coding/10310-class-performance?code_type=1
+
+Python Solution:
+
+import pandas as pd 
+import numpy as np
+
+box_scores["total_scores"] = box_scores[["assignment1","assignment2","assignment3"]].sum(axis=1)
+
+box_scores["total_scores"].max()-box_scores["total_scores"].min()
+
+
+----------------------------------------------------------------------------------------------------
+Postgres Solution:
+
+WITH student_scores AS (
+SELECT
+    assignment1+assignment2+assignment3 as total_score
+FROM box_scores)
+SELECT
+    MAX(total_score) - MIN(total_score) as score_diff
+FROM student_scores;
