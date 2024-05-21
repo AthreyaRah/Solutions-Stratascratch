@@ -1,0 +1,39 @@
+Q3 - Best Selling Item
+
+https://platform.stratascratch.com/coding/10172-best-selling-item?code_type=1
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+
+online_retail["totalSales"] = online_retail["quantity"]*online_retail["unitprice"]
+monthlyTotalSales = online_retail.groupby(by=[online_retail.invoicedate.dt.month, online_retail.description])["totalSales"].sum().reset_index()
+
+monthlyTotalSales["salesRank"] = monthlyTotalSales.groupby("invoicedate")["totalSales"].rank(ascending=False)
+monthlyTotalSales.loc[monthlyTotalSales["salesRank"]==1][["invoicedate","description","totalSales"]]
+
+
+------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH total_item_sales AS(
+SELECT 
+    EXTRACT('month' FROM invoicedate) as month,
+    description,
+    SUM(unitprice*quantity) as totalPaid
+FROM online_retail
+GROUP BY 1,2),
+ranking_sales AS (
+SELECT
+    month,
+    description,
+    totalPaid,
+    DENSE_RANK() OVER(PARTITION BY month ORDER BY totalPaid DESC) as sales_rank
+FROM total_item_sales)
+SELECT
+    month,
+    description,
+    totalPaid
+FROM ranking_sales 
+WHERE sales_rank = 1
