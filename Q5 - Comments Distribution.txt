@@ -1,0 +1,41 @@
+Comments Distribution
+
+https://platform.stratascratch.com/coding/10297-comments-distribution?code_type=1
+
+import pandas as pd
+import numpy as np
+
+user_mask = (fb_users["joined_at"].dt.year > 2017) & (fb_users["joined_at"].dt.year < 2021)
+comments_mask = (fb_comments["created_at"].dt.month == 1) & (fb_comments["created_at"].dt.year == 2020)
+
+filtered_users = fb_users.loc[user_mask]
+filtered_comments  = fb_comments.loc[comments_mask]
+
+users_comments_df = filtered_users.merge(filtered_comments, left_on = "id", right_on = "user_id", how = "outer")
+
+bug_mask = users_comments_df["joined_at"] < users_comments_df["created_at"]
+
+users_comments_df_final = users_comments_df.loc[bug_mask]
+
+comments_count = users_comments_df_final.groupby("id")["user_id"].agg("count").reset_index()
+
+user_count = comments_count.groupby("user_id").agg("count").reset_index()
+
+
+----------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH comments_bucket AS (
+SELECT
+    users.id,
+    COUNT(comments.user_id) as comment_count
+FROM fb_users AS users JOIN fb_comments AS comments
+ON users.id = comments.user_id AND users.joined_at < comments.created_at
+WHERE EXTRACT('year' FROM users.joined_at)>2017 AND EXTRACT('year' FROM users.joined_at)<2021 AND EXTRACT('month' FROM comments.created_at) = 1
+GROUP BY 1)
+SELECT
+    comment_count,
+    COUNT(id) as user_count
+FROM comments_bucket
+GROUP BY 1
+ORDER BY 1
