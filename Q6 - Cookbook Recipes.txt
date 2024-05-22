@@ -1,0 +1,45 @@
+Cookbook Recipes
+
+https://platform.stratascratch.com/coding/2089-cookbook-recipes?code_type=1
+
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+cookbook_titles.head()
+cookbook_titles_complete = cookbook_titles.set_index('page_number').reindex(index=np.arange(0,cookbook_titles["page_number"].max()+1)).reset_index()
+cookbook_titles_complete["right_page"] = cookbook_titles_complete["page_number"]+1
+cookbook_titles_final = cookbook_titles_complete.merge(cookbook_titles_complete, left_on="right_page",right_on="page_number").rename({"page_number_x":"page_number","title_x":"left_title","title_y":"right_title"},axis=1)
+
+
+mask = cookbook_titles_final["page_number"] %2 == 0 
+
+cookbook_titles_final[mask][["page_number","left_title","right_title"]]
+
+--------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH resultant_table AS (
+SELECT
+    generate_series as page_number,
+    NULL as title
+FROM
+    generate_series(0, (SELECT MAX(page_number) FROM cookbook_titles))
+WHERE
+    NOT generate_series IN (SELECT page_number FROM cookbook_titles)
+UNION 
+SELECT * FROM cookbook_titles),
+final_table AS (
+SELECT
+    lt.page_number,
+    lt.title AS left_title,
+    rt.title AS right_title
+FROM resultant_table lt JOIN resultant_table rt
+ON lt.page_number+1 = rt.page_number)
+SELECT
+    *
+FROM final_table
+WHERE page_number %2 = 0
+ORDER BY page_number;
