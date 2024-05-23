@@ -1,0 +1,32 @@
+Differences In Movie Ratings
+
+https://platform.stratascratch.com/coding/9606-differences-in-movie-ratings?code_type=1
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+non_null_df = nominee_filmography.loc[(nominee_filmography["rating"].notnull()) & (nominee_filmography["role_type"]=="Normal Acting")]
+non_null_df['lifetime_avg'] = non_null_df.groupby("name")["rating"].transform(np.mean)
+non_null_df["movie_rank"]=non_null_df.groupby("name")["id"].rank(ascending=False)
+non_null_df["variance"] = abs(non_null_df["lifetime_avg"] - non_null_df["rating"])
+non_null_df.loc[non_null_df["movie_rank"]==2][["name","rating","lifetime_avg","variance"]]
+
+----------------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH base_table AS (SELECT
+    name,
+    rating,
+    AVG(rating) OVER (PARTITION BY name) as lifetime_avg,
+    DENSE_RANK() OVER (PARTITION BY name ORDER BY id DESC) as movie_rank
+FROM nominee_filmography
+WHERE role_type = 'Normal Acting' AND rating IS NOT NULL)
+SELECT
+    name,
+    rating,
+    lifetime_avg,
+    ABS(lifetime_avg - rating) as variance
+FROM base_table
+WHERE movie_rank = 2
