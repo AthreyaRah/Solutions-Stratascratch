@@ -1,0 +1,35 @@
+Department Manager and Employee Salary Comparison
+
+https://platform.stratascratch.com/coding/2146-department-manager-and-employee-salary-comparison?code_type=1
+
+# Import your libraries
+import pandas as pd, math
+import numpy as np
+
+# Start writing code
+
+manager_df=employee_o.loc[employee_o["employee_title"]=="Manager"][["id","department","salary"]].rename({"id":"manager_id","salary":"manager_salary"},axis=1)
+
+employee_df = employee_o.loc[employee_o["employee_title"]!="Manager"][["id","salary","manager_id"]].rename({"salary":"employee_salary","id":"employee_id"},axis=1)
+
+final_df = employee_df.merge(manager_df,left_on="manager_id",right_on="manager_id")
+
+final_df.drop(labels="manager_id",axis=1,inplace=True)
+
+final_df["avg_employee_salary"] = final_df.groupby("department")["employee_salary"].transform(np.mean).round()
+
+final_df.loc[:,["department","employee_id","employee_salary","manager_salary","avg_employee_salary"]].sort_values(by=["department","employee_salary"],ascending=[True,False])
+
+
+-------------------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    t1.department,
+    t1.id,
+    t1.salary AS employee_salary,
+    t2.salary AS manager_salary,
+    ROUND(AVG(t1.salary) OVER (PARTITION BY t1.department),0) as avg_employee_salary
+FROM employee_o t1 JOIN employee_o t2
+ON t1.manager_id = t2.id AND t1.id <> t2.id
+ORDER BY t1.salary DESC
