@@ -1,0 +1,25 @@
+Find all businesses whose lowest and highest inspection scores are different
+
+https://platform.stratascratch.com/coding/9731-find-all-businesses-whose-lowest-and-highest-inspection-scores-are-different?code_type=1
+
+import pandas as pd
+import numpy as np
+
+sf_restaurant_health_violations.head()
+
+df = sf_restaurant_health_violations.loc[:,["business_name","inspection_score"]]
+
+df = df.groupby("business_name")["inspection_score"].agg([np.min,np.max]).reset_index()
+df.loc[df["amin"] != df["amax"]].dropna(axis=0)
+
+--------------------------------------------------------------------------------
+Postgres Solution
+
+
+SELECT
+    business_name,
+    MIN(inspection_score) as lowest_insp_score,
+    MAX(inspection_score) as highest_insp_score
+FROM sf_restaurant_health_violations
+GROUP BY 1
+HAVING MIN(inspection_score) <> MAX(inspection_score)
