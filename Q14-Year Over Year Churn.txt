@@ -1,0 +1,34 @@
+Q14 - Year Over Year Churn
+
+https://platform.stratascratch.com/coding/10017-year-over-year-churn?code_type=1
+
+
+
+
+--------------------------------------------------------------------------------
+Postgres Solution
+
+WITH CTE AS (
+SELECT
+    EXTRACT('year' FROM end_date) as year_left,
+    COUNT(DISTINCT index) as num_drivers
+FROM lyft_drivers
+WHERE end_date IS NOT NULL
+GROUP BY 1),
+cur_prev_comp AS (
+SELECT
+    year_left,
+    num_drivers AS current_year,
+    COALESCE(LAG(num_drivers,1) OVER(ORDER BY year_left),0) AS previous_year
+FROM CTE)
+SELECT
+    year_left,
+    current_year,
+    previous_year,
+    CASE
+        WHEN current_year = previous_year THEN 'no change'
+        WHEN current_year > previous_year THEN 'increase'
+        ELSE 'decrease'
+    END AS outcome
+FROM cur_prev_comp
+ORDER BY year_left
