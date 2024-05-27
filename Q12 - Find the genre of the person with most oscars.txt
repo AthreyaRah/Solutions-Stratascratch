@@ -1,4 +1,4 @@
-Q12 - Find the genre of the person with the most number of oscar winnings
+Q12 - Find the genre of the person with the most number of Oscar winnings
 
 https://platform.stratascratch.com/coding/10171-find-the-genre-of-the-person-with-the-most-number-of-oscar-winnings?code_type=1
 
