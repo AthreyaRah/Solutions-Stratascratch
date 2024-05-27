@@ -1,0 +1,29 @@
+Q12 - Find the genre of the person with the most number of oscar winnings
+
+https://platform.stratascratch.com/coding/10171-find-the-genre-of-the-person-with-the-most-number-of-oscar-winnings?code_type=1
+
+
+import pandas as pd
+import numpy as np
+
+oscar_winners = oscar_nominees.loc[oscar_nominees["winner"]==True]
+oscar_winners= oscar_winners.groupby("nominee").size().reset_index(name='oscars')
+oscar_winners = oscar_winners.sort_values(by=['oscars','nominee'],ascending=[False,True]).reset_index(drop=True)
+
+oscar_winner_genre = oscar_winners.merge(nominee_information,left_on="nominee",right_on="name", how="inner")["top_genre"][0]
+
+-----------------------------------------------------------------------------------------------------------------
+
+Postgres Solution
+
+WITH CTE AS (SELECT
+    nominee,
+    COUNT(*) AS num_of_oscars
+FROM oscar_nominees
+WHERE winner = TRUE
+GROUP BY 1
+ORDER BY 2 DESC, 1 LIMIT 1)
+SELECT
+    t2.top_genre
+FROM CTE t1 JOIN nominee_information t2
+ON t1.nominee = t2.name
