@@ -1,0 +1,31 @@
+Q-13 Find the number of employees who received the bonus and who didn't
+
+https://platform.stratascratch.com/coding/10081-find-the-number-of-employees-who-received-the-bonus-and-who-didnt?code_type=1
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+bonus = employee.merge(bonus,left_on="id",right_on="worker_ref_id",how="left")
+bonus_df = bonus.loc[:,["id","bonus_amount"]]
+bonus_df["has_bonus"] = bonus_df["bonus_amount"].apply(lambda x: 1 if pd.notnull(x) else 0)
+
+bonus_df.drop_duplicates("id",inplace=True)
+bonus_df.groupby("has_bonus").size().reset_index().rename(columns={0:"count"})
+
+
+----------------------------------------------------------------------------------
+Postgres Solution
+
+WITH emp_bonus AS (
+SELECT
+    e.id,
+    CASE WHEN bonus_amount IS NOT NULL THEN 1 ELSE 0 END AS has_bonus
+FROM employee e LEFT JOIN bonus b
+ON e.id = b.worker_ref_id)
+SELECT
+    has_bonus,
+    COUNT(DISTINCT id)
+FROM emp_bonus
+GROUP BY has_bonus
