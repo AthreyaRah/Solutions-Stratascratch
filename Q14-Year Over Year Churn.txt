@@ -3,7 +3,27 @@ Q14 - Year Over Year Churn
 https://platform.stratascratch.com/coding/10017-year-over-year-churn?code_type=1
 
 
+# Import your libraries
+import pandas as pd
+import numpy as np
 
+# Start writing code
+def churn_comp(x):
+    if x["current_year_churn"] > x["prev_year_churn"]:
+        x["churn_comparison"] = "increase"
+    elif x["current_year_churn"] == x["prev_year_churn"]:
+        x["churn_comparison"] = "no change"
+    else:
+        x["churn_comparison"] = "decrease"
+    return x
+
+
+lyft_drivers["end_year"] = lyft_drivers["end_date"].dt.year
+lyft_drivers.dropna(inplace=True)
+df=lyft_drivers.groupby("end_year").size().reset_index().rename(columns = {0:"current_year_churn"})
+df["prev_year_churn"] = df["current_year_churn"].shift(1)
+df.fillna(0,inplace=True)
+df.apply(churn_comp, axis=1)
 
 --------------------------------------------------------------------------------
 Postgres Solution
