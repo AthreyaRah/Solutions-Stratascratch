@@ -1,0 +1,30 @@
+Q-15 Find the top 5 least paid employees for each job title
+
+
+https://platform.stratascratch.com/coding/9986-find-the-top-5-least-paid-employees-for-each-job-title?code_type=1
+
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+df = sf_public_salaries.loc[:,["employeename","jobtitle","totalpaybenefits"]]
+df["salary_rank"] = df.groupby("jobtitle")["totalpaybenefits"].rank()
+df[df["salary_rank"]<6][["employeename","jobtitle","totalpaybenefits"]]
+
+
+-------------------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH CTE AS (SELECT
+    employeename,
+    jobtitle,
+    totalpaybenefits,
+    DENSE_RANK() OVER(PARTITION BY jobtitle ORDER BY totalpaybenefits) as salary_rank
+FROM sf_public_salaries)
+SELECT
+    employeename,
+    jobtitle,
+    totalpaybenefits
+FROM CTE
+WHERE salary_rank <6
