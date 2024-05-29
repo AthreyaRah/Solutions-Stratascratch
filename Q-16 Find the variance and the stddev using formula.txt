@@ -1,0 +1,34 @@
+Q-16 Find the variance and the standard deviation of scores that have grade A
+
+https://platform.stratascratch.com/coding/9708-find-the-variance-and-the-standard-deviation-of-scores-that-have-grade-a?code_type=1
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+los_angeles_restaurant_health_inspections.head()
+df=los_angeles_restaurant_health_inspections.loc[los_angeles_restaurant_health_inspections["grade"]=='A'][["score"]]
+df["var"] = (df["score"]-df["score"].mean())**2
+
+df["variance"] = df["var"].mean()
+df["std_dev"] = df["variance"].apply(np.sqrt)
+
+final = df[["variance","std_dev"]].drop_duplicates()
+# math.sqrt(df["var"])
+
+-------------------------------------------------------------------------------------------------------------
+
+Postgres Solution
+
+WITH CTE AS (
+SELECT
+    score,
+    grade,
+    POW((score - AVG(score) OVER()),2) as var_2
+FROM los_angeles_restaurant_health_inspections
+WHERE grade = 'A')
+SELECT
+    AVG(var_2) AS var,
+    SQRT(AVG(var_2)) as std
+FROM CTE
