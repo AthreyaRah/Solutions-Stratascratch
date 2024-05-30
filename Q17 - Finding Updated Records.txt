@@ -1,0 +1,27 @@
+Q17 - Finding Updated Records
+
+https://platform.stratascratch.com/coding/10299-finding-updated-records?code_type=1
+
+
+
+import numpy as np
+import pandas as pd
+
+df = ms_employee_salary
+
+df.groupby(["id","first_name","last_name","department_id"])["salary"].max()
+
+
+----------------------------------------------------------------------------------------
+Postgres Solution
+
+
+SELECT
+    id,
+    first_name,
+    last_name,
+    department_id,
+    MAX(salary) AS current_salary
+FROM ms_employee_salary
+GROUP BY 1,2,3,4
+ORDER BY 1
