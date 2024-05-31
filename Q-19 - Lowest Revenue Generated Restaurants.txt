@@ -1,0 +1,41 @@
+Q-19 Lowest Revenue Generated Restaurants
+
+https://platform.stratascratch.com/coding/2036-lowest-revenue-generated-restaurants?code_type=1
+
+
+
+# Import your libraries
+import pandas as pd, math
+import numpy as np
+
+# Start writing code
+doordash_delivery.head()
+df = doordash_delivery
+mask = (df["customer_placed_order_datetime"].dt.year == 2020) & (df["customer_placed_order_datetime"].dt.month ==5)
+
+df = df.loc[mask][["restaurant_id","order_total"]]
+
+df = df.groupby("restaurant_id")["order_total"].sum().reset_index()
+# df["pct_rnk"] = df["order_total"].rank(pct=True)
+df["pct_rnk"] = pd.qcut(df["order_total"],50,duplicates='drop',labels=range(1, 50))
+df.loc[df["pct_rnk"]<2][["restaurant_id","order_total"]]
+
+
+
+--------------------------------------------------------------------------------------------------
+Postgres Solution
+
+
+WITH CTE AS (
+SELECT
+    restaurant_id,
+    SUM(order_total) as total_revenue,
+    NTILE(100) OVER(ORDER BY SUM(order_total)) AS percentile_rank
+FROM doordash_delivery
+WHERE to_char(customer_placed_order_datetime,'MM-YYYY') = '05-2020'
+GROUP BY 1)
+SELECT
+    restaurant_id,
+    total_revenue
+FROM CTE
+WHERE percentile_rank <=2
