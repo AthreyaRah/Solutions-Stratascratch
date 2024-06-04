@@ -1,0 +1,56 @@
+Q24 - New And Existing Users
+
+https://platform.stratascratch.com/coding/2028-new-and-existing-users?code_type=1
+
+
+import pandas as pd
+
+df = fact_events
+
+df["month"] = df["time_id"].dt.month
+
+df_all = df.loc[:,["user_id","month"]].drop_duplicates()
+
+df_all = df_all.groupby("month")["user_id"].size().reset_index().rename(columns={'user_id':'all_users'})
+
+df_new = df.groupby('user_id')['month'].min().reset_index()
+
+df_new_usr = df_new.groupby('month')["user_id"].size().reset_index().rename(columns={'user_id':'new_users'})
+
+final_df = df_all.merge(df_new_usr,on='month')
+
+final_df["new_share"] = final_df["new_users"]/final_df["all_users"]
+
+final_df["existing_share"] = 1- (final_df["new_users"]/final_df["all_users"])
+
+final_df.loc[:,["month","new_share","existing_share"]]
+
+
+---------------------------------------------------------------------------------
+Postgres Solution
+
+WITH joining_date AS (
+SELECT
+    user_id,
+    MIN(time_id) as joining_date
+FROM fact_events
+GROUP BY 1
+),
+new_users_per_month AS (
+SELECT
+    EXTRACT('month' FROM joining_date) as month,
+    COUNT(DISTINCT user_id) AS new_users_per_month
+FROM joining_date
+GROUP BY 1),
+all_users AS (
+SELECT
+    EXTRACT('month' FROM time_id) as month,
+    COUNT(DISTINCT user_id) as all_users
+FROM fact_events
+GROUP BY 1)
+SELECT
+    t1.month,
+    t1.new_users_per_month / t2.all_users::float AS new_usr_share,
+    1- (t1.new_users_per_month / t2.all_users::float) AS existing_share
+FROM new_users_per_month t1 JOIN all_users t2
+ON t1.month = t2.month
