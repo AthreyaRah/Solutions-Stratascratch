@@ -1,0 +1,23 @@
+Q26 - Number Of Acquisitions
+
+https://platform.stratascratch.com/coding/10162-number-of-acquisitions?code_type=1
+
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+df = crunchbase_acquisitions
+
+df['quarter'] =  df['acquired_quarter'].dt.to_period('Q')
+df.groupby("quarter").size().reset_index().rename(columns={0:'num_acquisitions'}).sort_values(by='num_acquisitions',ascending=False)
+
+-------------------------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT 
+    acquired_quarter,
+    COUNT(acquirer_name) as total_acquisitions
+FROM crunchbase_acquisitions
+GROUP BY 1
+ORDER BY 2 DESC
