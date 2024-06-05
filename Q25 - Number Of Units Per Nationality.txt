@@ -1,0 +1,25 @@
+Q25 - Number Of Units Per Nationality
+
+https://platform.stratascratch.com/coding/10156-number-of-units-per-nationality?code_type=1
+
+
+import pandas as pd
+
+df = pd.merge(left=airbnb_hosts,right=airbnb_units,left_on='host_id',right_on='host_id',how='inner')
+
+df=df.loc[(df["unit_type"]=='Apartment') & (df["age"]<30)]
+
+df.groupby('nationality')["unit_id"].nunique()
+
+
+---------------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    nationality,
+    COUNT(DISTINCT t2.unit_id)
+FROM airbnb_hosts t1 JOIN airbnb_units t2
+ON t1.host_id = t2.host_id
+WHERE age < 30 AND unit_type = 'Apartment'
+GROUP BY 1
+ORDER BY 2 DESC
