@@ -1,0 +1,46 @@
+Q27 - Popularity Percentage
+
+https://platform.stratascratch.com/coding/10284-popularity-percentage?code_type=1
+
+
+import pandas as pd
+
+facebook_friends.head()
+
+df1 = facebook_friends[["user1","user2"]]
+df2 =  facebook_friends[["user2","user1"]].rename(columns={"user2":"user1","user1":"user2"})
+
+df = pd.concat([df1,df2],axis=0)
+# df.drop_duplicates(inplace=True)
+
+df = df.groupby('user1').size().reset_index().rename(columns={0:'num_friends'})
+
+df["pop_pct"] = 100.0 * df["num_friends"]/len(df)
+
+df[["user1","pop_pct"]]
+
+-----------------------------------------------------------------------------------------------
+
+WITH combined_table AS (
+SELECT
+    user1,
+    user2
+FROM facebook_friends
+UNION
+SELECT
+    user2 AS user1,
+    user1 AS user2
+FROM facebook_friends),
+friend_counts AS (
+SELECT
+    user1,
+    COUNT(user2) as num_friends,
+    COUNT(user1) OVER() as total_friends
+FROM combined_table
+GROUP BY 1
+ORDER BY 1)
+SELECT
+   user1,
+   100.0 * num_friends / total_friends::float as pop_pct
+FROM friend_counts
+
