@@ -1,0 +1,30 @@
+Q28 - Positive Ad Channels
+
+https://platform.stratascratch.com/coding/10013-positive-ad-channels?code_type=1
+
+import pandas as pd
+import numpy as np
+
+df = uber_advertising.groupby('advertising_channel').agg({'customers_acquired':'min','money_spent':'max'}).reset_index()
+
+df = df.loc[df['customers_acquired']>1500].sort_values('money_spent')
+df['rank']=df['money_spent'].rank(method='dense')
+
+df[df['rank']==1]['advertising_channel']
+
+
+---------------------------------------------------------------------------------------------------------------
+
+Postgres Solution
+
+WITH CTE AS (SELECT
+    advertising_channel,
+    MAX(money_spent) as max_adv_spend,
+    DENSE_RANK() OVER (ORDER BY MAX(money_spent)) as spend_rank
+FROM uber_advertising
+GROUP BY 1
+HAVING MIN(customers_acquired)>1500)
+SELECT
+    advertising_channel
+FROM CTE
+WHERE spend_rank = 1
