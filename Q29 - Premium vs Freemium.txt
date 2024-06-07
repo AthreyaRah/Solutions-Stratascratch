@@ -1,0 +1,32 @@
+Q29 - Premium vs Freemium
+
+https://platform.stratascratch.com/coding/10300-premium-vs-freemium?code_type=1
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+ms_user_dimension.head()
+df = ms_download_facts.merge(ms_user_dimension, on='user_id', how='inner').merge(ms_acc_dimension,on='acc_id',how='inner')
+
+df = df.loc[:,['date','downloads','paying_customer']]
+
+df1 = df.groupby(['date','paying_customer'])['downloads'].sum().reset_index()
+final = df1.pivot(index='date',columns='paying_customer',values='downloads').reset_index()
+
+final.rename(columns={'no':'non_paying','yes':'paying'},inplace=True)
+result = final.loc[final['non_paying']>final['paying']].sort_values('date')
+
+-----------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    t1.date,
+    SUM(CASE WHEN t3.paying_customer = 'no' THEN t1.downloads ELSE 0 END) AS non_paying,
+    SUM(CASE WHEN t3.paying_customer = 'yes' THEN t1.downloads ELSE 0 END) AS paying
+FROM ms_download_facts t1 JOIN ms_user_dimension t2
+ON t1.user_id = t2.user_id JOIN ms_acc_dimension t3
+ON t2.acc_id = t3.acc_id
+GROUP BY 1
+HAVING SUM(CASE WHEN t3.paying_customer = 'no' THEN t1.downloads ELSE 0 END) > SUM(CASE WHEN t3.paying_customer = 'yes' THEN t1.downloads ELSE 0 END)
+ORDER BY 1
