@@ -1,0 +1,27 @@
+Q30 - Product Transaction Count
+
+https://platform.stratascratch.com/coding/10163-product-transaction-count?code_type=1
+
+
+# Import your libraries
+import pandas as pd
+
+
+df = excel_sql_inventory_data.merge(excel_sql_transaction_data, on='product_id',how='inner')
+result = df.groupby(['product_id','product_name'])['transaction_id'].size().reset_index()
+result.sort_values('product_id')[['product_name','transaction_id']]
+
+-----------------------------------------------------------------------------------------------
+Postgres Solution
+
+WITH CTE AS (SELECT
+    t1.product_id,
+    t1.product_name,
+    COUNT(t2.transaction_id) as num_txns
+FROM excel_sql_inventory_data t1 JOIN excel_sql_transaction_data t2
+ON t1.product_id = t2.product_id
+GROUP BY 1,2)
+SELECT
+    product_name,
+    num_txns
+FROM CTE ORDER BY product_id 
