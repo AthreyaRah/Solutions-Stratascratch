@@ -1,0 +1,25 @@
+Q31 - Quarterback With The Longest Throw
+
+https://platform.stratascratch.com/coding/9966-quarterback-with-the-longest-throw?code_type=1
+
+
+import pandas as pd
+import re
+
+df = qbstats_2015_2016
+
+df["lg_num"] = df['lg'].str.extract('(\d+)')
+
+df = df[df["year"]==2016]
+
+df.loc[df['lg_num']==df['lg_num'].max()][["qb","lg_num"]]
+
+------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    qb,
+    REGEXP_REPLACE(lg, '[[:alpha:]]', '', 'g') AS lg_num
+FROM qbstats_2015_2016
+WHERE year = 2016 AND lg = (SELECT mAX(lg) FROM qbstats_2015_2016)
+
