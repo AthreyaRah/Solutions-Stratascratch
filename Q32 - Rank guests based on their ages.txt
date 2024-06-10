@@ -1,0 +1,19 @@
+Q32 - Rank guests based on their ages
+
+https://platform.stratascratch.com/coding/10160-rank-guests-based-on-their-ages?code_type=1
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+airbnb_guests['rank']=airbnb_guests["age"].rank(ascending = False)
+
+airbnb_guests.sort_values('rank')[["guest_id","rank"]]
+
+---------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    guest_id,
+    RANK() OVER(ORDER BY age DESC) as age_rank
+FROM airbnb_guests
