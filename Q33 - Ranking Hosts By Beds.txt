@@ -1,0 +1,23 @@
+Q33 - Ranking Hosts By Beds
+
+https://platform.stratascratch.com/coding/10161-ranking-hosts-by-beds?code_type=2
+
+import pandas as pd
+
+df = airbnb_apartments
+
+beds_df = df.groupby('host_id')['n_beds'].sum().reset_index()
+
+beds_df['rank'] = beds_df["n_beds"].rank(ascending=False, method='dense')
+
+beds_df.sort_values('rank')
+
+--------------------------------------------------------------------------------------------------
+Postgres Solution
+
+SELECT
+    host_id,
+    SUM(n_beds) as total_beds,
+    DENSE_RANK() OVER(ORDER BY SUM(n_beds) DESC) as beds_rank
+FROM airbnb_apartments
+GROUP BY 1
