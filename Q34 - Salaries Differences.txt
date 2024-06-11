@@ -1,0 +1,29 @@
+Q34 - Salaries Differences
+
+https://platform.stratascratch.com/coding/10308-salaries-differences?code_type=1
+
+import pandas as pd
+
+df = pd.merge(db_employee, db_dept, left_on = 'department_id', right_on = 'id', how = 'left')
+
+df[df["department"]=="marketing"]["salary"].max() - df[df["department"]=="engineering"]["salary"].max()
+
+-----------------------------------------------------------------------------------------------------------
+
+Postgres Solution
+
+WITH engineering AS
+(SELECT
+    MAX(salary) as eng_salary
+FROM db_employee t1 JOIN db_dept t2
+ON t1.department_id = t2.id
+WHERE t2.department = 'engineering'),
+marketing AS (
+SELECT
+    MAX(salary) as mark_salary
+FROM db_employee t1 JOIN db_dept t2
+ON t1.department_id = t2.id
+WHERE t2.department = 'marketing')
+SELECT
+    ABS(mark_salary-eng_salary) as salary_diff
+FROM engineering,marketing
