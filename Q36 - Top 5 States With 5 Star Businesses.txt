@@ -1,0 +1,35 @@
+Q36 - Top 5 States With 5 Star Businesses
+
+https://platform.stratascratch.com/coding/10046-top-5-states-with-5-star-businesses?code_type=1
+
+
+import pandas as pd
+
+
+df = yelp_business
+
+df = df[df['stars']==5].groupby('state')['business_id'].count().reset_index().rename(columns={'business_id':'num_biz'})
+
+
+df['rank'] = df['num_biz'].rank(ascending=False)
+
+df[df['rank']<=5][['state','num_biz']]
+
+
+---------------------------------------------------------------------------------------------
+
+Postgres Solution
+
+WITH CTE AS (SELECT
+    state,
+    COUNT(*) as num_businesses,
+    RANK() OVER (ORDER BY COUNT(*) DESC) as business_rank
+FROM yelp_business
+WHERE stars = 5
+GROUP BY 1)
+SELECT
+    state,
+    num_businesses
+FROM CTE
+WHERE business_rank < 6
+
