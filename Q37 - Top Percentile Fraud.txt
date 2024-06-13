@@ -1,0 +1,29 @@
+Q37 - Top Percentile Fraud
+
+https://platform.stratascratch.com/coding/10303-top-percentile-fraud?code_type=1
+
+import pandas as pd
+
+df = fraud_score
+
+df['p5'] = df.groupby('state')['fraud_score'].transform(lambda x: x.drop_duplicates().quantile(0.95))
+
+df[df['fraud_score']>=df['p5']].drop('p5', axis=1)
+
+-----------------------------------------------------------------------------------------------
+Postgres Solution
+
+
+WITH CTE AS (SELECT
+    state,
+    PERCENTILE_CONT(0.05) WITHIN GROUP (ORDER BY fraud_score DESC) as claim_perc
+FROM fraud_score
+GROUP BY state)
+SELECT 
+    policy_num,
+    t1.state,
+    claim_cost,
+    fraud_score
+FROM fraud_score t1 JOIN CTE t2
+ON t1.state = t2.state
+WHERE fraud_score >= claim_perc
