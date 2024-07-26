@@ -1,0 +1,33 @@
+Q40-Weekly Orders Report
+
+https://platform.stratascratch.com/coding/10363-weekly-orders-report?code_type=1
+
+WITH week_qtr AS (
+SELECT
+    week,
+    stage_of_order,
+    quantity,
+    date_trunc('week', week) as order_week
+FROM orders_analysis)
+SELECT
+    order_week,
+    SUM(quantity) as total_quantity
+FROM week_qtr
+WHERE  EXTRACT('QUARTER' FROM week)=1
+GROUP BY 1
+    
+
+--------------------------------------------------------------------------------------------------
+
+# Import your libraries
+import pandas as pd
+
+# Start writing code
+orders_analysis.head()
+
+df=orders_analysis
+df["week"]=pd.to_datetime(df["week"])
+df["order_week"] = df["week"].dt.week
+df["quarter"]=df["week"].dt.quarter
+
+df.loc[df["quarter"]==1].groupby("week").agg(total_sales=("quantity","sum")).reset_index()
