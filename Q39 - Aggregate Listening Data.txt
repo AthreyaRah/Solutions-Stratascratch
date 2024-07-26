@@ -1,0 +1,25 @@
+Q-39 Aggregate Listening Data
+
+https://platform.stratascratch.com/coding/10367-aggregate-listening-data?code_type=1
+
+SELECT
+    user_id,
+    SUM(listen_duration)/60.0 as total_duration,
+    COUNT(DISTINCT song_id) as num_songs
+FROM listening_habits
+GROUP BY user_id
+
+
+------------------------------------------------------------------------------------------
+
+# Import your libraries
+import pandas as pd
+import numpy as np
+
+# Start writing code
+listening_habits.head()
+
+df=listening_habits
+
+df=df.groupby("user_id").agg(total_listen_duration=("listen_duration",'sum'),unique_song_count=("song_id",'nunique')).reset_index()
+df["total_listen_duration"]=df["total_listen_duration"]/60.0
